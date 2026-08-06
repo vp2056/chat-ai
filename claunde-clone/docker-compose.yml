@@ -1,0 +1,57 @@
+name: claunde
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    volumes:
+      - ollama-models:/root/.ollama
+    # Sem `ports:` de propósito — o 11434 não é publicado para não colidir
+    # com um Ollama já rodando no host. Só o backend fala com ele.
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  backend:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # Sobrescreve o que vier do .env: dentro da rede do compose o Ollama
+      # é `ollama`, não `localhost`, e o banco mora no volume /app/data.
+      OLLAMA_HOST: http://ollama:11434
+      DB_PATH: /app/data/claunde.db
+      HOST: 0.0.0.0
+      PORT: "8000"
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      ollama:
+        condition: service_started
+    expose:
+      - "8000"
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./frontend:/usr/share/nginx/html:ro
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  ollama-models:

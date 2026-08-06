@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Claunde</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✳️</text></svg>">
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">✳</span>
+        <span class="brand-name">Claunde</span>
+      </div>
+      <button class="icon-btn" id="collapseBtn" title="Recolher barra lateral" aria-label="Recolher barra lateral">
+        <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+      </button>
+    </div>
+
+    <button class="new-chat-btn" id="newChatBtn">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      Nova conversa
+    </button>
+
+    <div class="search-box">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="searchInput" placeholder="Buscar conversas…" autocomplete="off">
+    </div>
+
+    <nav class="chat-list" id="chatList" aria-label="Conversas"></nav>
+
+    <div class="sidebar-foot">
+      <button class="foot-btn" id="settingsBtn">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-1.8-.3 1.6 1.6 0 00-1 1.5V21a2 2 0 11-4 0v-.1A1.6 1.6 0 008 19.4a1.6 1.6 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00.3-1.8 1.6 1.6 0 00-1.5-1H3a2 2 0 110-4h.1A1.6 1.6 0 004.6 8a1.6 1.6 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 001.8.3H9a1.6 1.6 0 001-1.5V3a2 2 0 114 0v.1a1.6 1.6 0 001 1.5 1.6 1.6 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00-.3 1.8V9a1.6 1.6 0 001.5 1H21a2 2 0 110 4h-.1a1.6 1.6 0 00-1.5 1z"/></svg>
+        Configurações
+      </button>
+      <div class="status-pill" id="statusPill" title="Status do Ollama">
+        <span class="dot" id="statusDot"></span>
+        <span id="statusText">verificando…</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="sidebar-scrim" id="sidebarScrim"></div>
+
+  <!-- ===================== MAIN ===================== -->
+  <main class="main">
+    <header class="topbar">
+      <button class="icon-btn only-mobile" id="menuBtn" aria-label="Abrir menu">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+
+      <div class="chat-title-wrap">
+        <h1 class="chat-title" id="chatTitle" title="Clique duas vezes para renomear">Nova conversa</h1>
+      </div>
+
+      <div class="topbar-actions">
+        <div class="model-select" id="modelSelectWrap">
+          <button class="model-btn" id="modelBtn" aria-haspopup="listbox" aria-expanded="false">
+            <span id="modelBtnLabel">carregando…</span>
+            <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="dropdown" id="modelDropdown" role="listbox" hidden></div>
+        </div>
+
+        <button class="icon-btn" id="exportBtn" title="Exportar conversa (Markdown)" aria-label="Exportar">
+          <svg viewBox="0 0 24 24"><path d="M12 3v12M8 11l4 4 4-4M5 21h14"/></svg>
+        </button>
+        <button class="icon-btn" id="themeBtn" title="Alternar tema" aria-label="Alternar tema">
+          <svg viewBox="0 0 24 24" id="themeIcon"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+        </button>
+        <button class="icon-btn danger" id="deleteChatBtn" title="Excluir conversa" aria-label="Excluir conversa">
+          <svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <section class="messages" id="messages" aria-live="polite">
+      <!-- estado vazio -->
+      <div class="welcome" id="welcome">
+        <div class="welcome-mark">✳</div>
+        <h2>Como posso ajudar hoje?</h2>
+        <p class="welcome-sub">Tudo roda localmente na sua máquina, via Ollama. Nenhum dado sai daqui.</p>
+        <div class="suggestions" id="suggestions">
+          <button class="suggestion" data-prompt="Explique o que é uma closure em JavaScript com um exemplo prático.">
+            <strong>Explicar código</strong><span>Closures em JavaScript</span>
+          </button>
+          <button class="suggestion" data-prompt="Escreva uma função Python que faça parsing de um arquivo CSV grande de forma eficiente, em streaming.">
+            <strong>Escrever código</strong><span>Parser de CSV em streaming</span>
+          </button>
+          <button class="suggestion" data-prompt="Resuma os principais pontos a considerar ao projetar uma API REST versionada.">
+            <strong>Resumir</strong><span>Boas práticas de API REST</span>
+          </button>
+          <button class="suggestion" data-prompt="Me ajude a fazer um brainstorm de nomes para um app de organização de tarefas offline.">
+            <strong>Brainstorm</strong><span>Nomes para um app</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <div class="scroll-bottom" id="scrollBottomBtn" hidden>
+      <button class="icon-btn" aria-label="Ir para o fim">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+      </button>
+    </div>
+
+    <footer class="composer-wrap">
+      <div class="composer" id="composer">
+        <textarea id="input" rows="1" placeholder="Envie uma mensagem para o Claunde…" autocomplete="off"></textarea>
+        <div class="composer-actions">
+          <span class="hint" id="composerHint">Enter envia · Shift+Enter quebra linha</span>
+          <button class="send-btn" id="sendBtn" title="Enviar" aria-label="Enviar">
+            <svg viewBox="0 0 24 24"><path d="M4 12l16-8-6 8 6 8-16-8z"/></svg>
+          </button>
+          <button class="stop-btn" id="stopBtn" hidden title="Parar geração">
+            <svg viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>
+            Parar
+          </button>
+        </div>
+      </div>
+      <p class="disclaimer">Claunde pode cometer erros. Verifique informações importantes.</p>
+    </footer>
+  </main>
+</div>
+
+<!-- ===================== MODAL DE CONFIGURAÇÕES ===================== -->
+<div class="modal-backdrop" id="settingsModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <header class="modal-head">
+      <h2 id="settingsTitle">Configurações</h2>
+      <button class="icon-btn" id="closeSettings" aria-label="Fechar">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </header>
+
+    <div class="modal-tabs">
+      <button class="tab active" data-tab="general">Geral</button>
+      <button class="tab" data-tab="model">Modelo</button>
+      <button class="tab" data-tab="models">Modelos instalados</button>
+      <button class="tab" data-tab="data">Dados</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Geral -->
+      <div class="tab-panel active" data-panel="general">
+        <label class="field">
+          <span class="field-label">Instruções do sistema</span>
+          <textarea id="setSystemPrompt" rows="6" placeholder="Como o assistente deve se comportar…"></textarea>
+          <span class="field-help">Aplicado a novas conversas e a conversas sem instrução própria.</span>
+        </label>
+        <label class="field row">
+          <span class="field-label">Tema</span>
+          <select id="setTheme">
+            <option value="dark">Escuro</option>
+            <option value="light">Claro</option>
+          </select>
+        </label>
+        <label class="field row">
+          <span class="field-label">Enter envia a mensagem</span>
+          <input type="checkbox" id="setSendOnEnter" class="switch">
+        </label>
+        <label class="field row">
+          <span class="field-label">Gerar título automaticamente</span>
+          <input type="checkbox" id="setAutoTitle" class="switch">
+        </label>
+        <label class="field row">
+          <span class="field-label">Mensagens enviadas como contexto</span>
+          <input type="number" id="setHistoryLimit" min="2" max="200" step="2">
+        </label>
+      </div>
+
+      <!-- Modelo -->
+      <div class="tab-panel" data-panel="model">
+        <label class="field row">
+          <span class="field-label">Modelo padrão</span>
+          <select id="setDefaultModel"></select>
+        </label>
+        <label class="field">
+          <span class="field-label">Temperatura <output id="outTemp">0.7</output></span>
+          <input type="range" id="setTemperature" min="0" max="2" step="0.05">
+          <span class="field-help">Baixa = respostas determinísticas. Alta = mais criatividade.</span>
+        </label>
+        <label class="field">
+          <span class="field-label">Top-p <output id="outTopP">0.9</output></span>
+          <input type="range" id="setTopP" min="0" max="1" step="0.05">
+        </label>
+        <label class="field row">
+          <span class="field-label">Top-k</span>
+          <input type="number" id="setTopK" min="0" max="200">
+        </label>
+        <label class="field row">
+          <span class="field-label">Máx. de tokens gerados</span>
+          <input type="number" id="setNumPredict" min="-1" max="32768" step="128">
+        </label>
+        <label class="field row">
+          <span class="field-label">Janela de contexto (num_ctx)</span>
+          <input type="number" id="setNumCtx" min="512" max="131072" step="512">
+        </label>
+        <label class="field row">
+          <span class="field-label">Penalidade de repetição</span>
+          <input type="number" id="setRepeatPenalty" min="0" max="4" step="0.05">
+        </label>
+      </div>
+
+      <!-- Modelos instalados -->
+      <div class="tab-panel" data-panel="models">
+        <div class="pull-row">
+          <input type="text" id="pullInput" placeholder="ex.: llama3.2:3b, qwen2.5-coder:7b">
+          <button class="btn" id="pullBtn">Baixar</button>
+        </div>
+        <div class="pull-progress" id="pullProgress" hidden>
+          <div class="bar"><div class="bar-fill" id="pullBarFill"></div></div>
+          <span id="pullStatus"></span>
+        </div>
+        <p class="field-help">O download exige internet. Depois disso, tudo funciona offline.</p>
+        <div class="model-table" id="modelTable"></div>
+      </div>
+
+      <!-- Dados -->
+      <div class="tab-panel" data-panel="data">
+        <div class="stat-grid" id="statGrid"></div>
+        <div class="danger-zone">
+          <h3>Zona de perigo</h3>
+          <p>Remove todas as conversas e mensagens do banco local. Não há como desfazer.</p>
+          <button class="btn danger" id="wipeBtn">Apagar todas as conversas</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<script src="/js/markdown.js"></script>
+<script src="/js/highlight.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>
